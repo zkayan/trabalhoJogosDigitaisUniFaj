@@ -4,7 +4,7 @@ using System.Collections;
 public class HeroKnight : MonoBehaviour {
 
     [SerializeField] float      m_speed = 4.0f;
-    [SerializeField] float      m_jumpForce = 7.5f;
+    [SerializeField] float      m_jumpForce = 5.5f;
     [SerializeField] float      m_rollForce = 6.0f;
     [SerializeField] bool       m_noBlood = false;
     [SerializeField] GameObject m_slideDust;
@@ -17,6 +17,7 @@ public class HeroKnight : MonoBehaviour {
     private Sensor_HeroKnight   m_wallSensorL1;
     private Sensor_HeroKnight   m_wallSensorL2;
     private bool                m_grounded = false;
+    private bool                m_extraJump = false;
     private bool                m_rolling = false;
     private int                 m_facingDirection = 1;
     private int                 m_currentAttack = 0;
@@ -73,7 +74,7 @@ public class HeroKnight : MonoBehaviour {
         }
 
         // Move
-        if (!m_rolling )
+        if (!m_rolling && m_timeSinceAttack > 0.45f )
             m_body2d.velocity = new Vector2(inputX * m_speed, m_body2d.velocity.y);
 
         //Set AirSpeed in animator
@@ -95,7 +96,7 @@ public class HeroKnight : MonoBehaviour {
             m_animator.SetTrigger("Hurt");
 
         //Attack
-        else if(Input.GetMouseButtonDown(0) && m_timeSinceAttack > 0.25f && !m_rolling)
+        else if((Input.GetMouseButtonDown(0) || Input.GetKeyDown("j")) && m_timeSinceAttack > 0.25f && !m_rolling)
         {
             m_currentAttack++;
 
@@ -115,13 +116,13 @@ public class HeroKnight : MonoBehaviour {
         }
 
         // Block
-        else if (Input.GetMouseButtonDown(1) && !m_rolling)
+        else if ((Input.GetMouseButtonDown(1) || Input.GetKeyDown("k")) && !m_rolling)
         {
             m_animator.SetTrigger("Block");
             m_animator.SetBool("IdleBlock", true);
         }
 
-        else if (Input.GetMouseButtonUp(1))
+        else if (Input.GetMouseButtonUp(1) || Input.GetKeyUp("k"))
             m_animator.SetBool("IdleBlock", false);
 
         // Roll
@@ -138,6 +139,16 @@ public class HeroKnight : MonoBehaviour {
         {
             m_animator.SetTrigger("Jump");
             m_grounded = false;
+            m_extraJump = true;
+            m_animator.SetBool("Grounded", m_grounded);
+            m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
+            m_groundSensor.Disable(0.2f);
+        }
+        else if (Input.GetKeyDown("space") && m_extraJump && !m_rolling)
+        {
+            m_animator.SetTrigger("Jump");
+            m_grounded = false;
+            m_extraJump = false;
             m_animator.SetBool("Grounded", m_grounded);
             m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
             m_groundSensor.Disable(0.2f);
