@@ -8,6 +8,8 @@ public class HeroKnight : MonoBehaviour {
     [SerializeField] float      m_rollForce = 6.0f;
     [SerializeField] bool       m_noBlood = false;
     [SerializeField] GameObject m_slideDust;
+    [SerializeField] float      hitPoint = 100.0f;
+    public float                currentHitPoint;
 
     private Animator            m_animator;
     private Rigidbody2D         m_body2d;
@@ -35,6 +37,7 @@ public class HeroKnight : MonoBehaviour {
         m_wallSensorR2 = transform.Find("WallSensor_R2").GetComponent<Sensor_HeroKnight>();
         m_wallSensorL1 = transform.Find("WallSensor_L1").GetComponent<Sensor_HeroKnight>();
         m_wallSensorL2 = transform.Find("WallSensor_L2").GetComponent<Sensor_HeroKnight>();
+        currentHitPoint = hitPoint;
     }
 
     // Update is called once per frame
@@ -197,4 +200,19 @@ public class HeroKnight : MonoBehaviour {
             dust.transform.localScale = new Vector3(m_facingDirection, 1, 1);
         }
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        AiController aiController = collision.gameObject.GetComponent<AiController>();
+
+        if (aiController)
+        {
+            currentHitPoint -= aiController.damage;
+            Vector2 direction = collision.gameObject.transform.position.normalized;
+            direction.y = 0f;
+            m_body2d.velocity = Vector2.zero;
+            m_body2d.AddForce(direction * 150, ForceMode2D.Impulse);
+        }
+    }
+
 }
