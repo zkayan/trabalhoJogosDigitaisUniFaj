@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class HeroKnight : MonoBehaviour {
 
@@ -8,8 +9,9 @@ public class HeroKnight : MonoBehaviour {
     [SerializeField] float      m_rollForce = 6.0f;
     [SerializeField] bool       m_noBlood = false;
     [SerializeField] GameObject m_slideDust;
-    [SerializeField] float      hitPoint = 100.0f;
-    public float                currentHitPoint;
+    [SerializeField] float      m_hitPoint = 100.0f;
+    [SerializeField] int        m_hitForce = 5;
+    [SerializeField] float      m_currentHitPoint;
 
     private Animator            m_animator;
     private Rigidbody2D         m_body2d;
@@ -25,7 +27,27 @@ public class HeroKnight : MonoBehaviour {
     private int                 m_currentAttack = 0;
     private float               m_timeSinceAttack = 0.0f;
     private float               m_delayToIdle = 0.0f;
+    private WaitForSeconds      m_hitSeconds = new WaitForSeconds(0.3f);
+    private WaitForSeconds      m_deathSeconds = new WaitForSeconds(2f);
 
+    public float CurrentHitPoint
+    {
+        get => m_currentHitPoint;
+        set
+        {
+            m_currentHitPoint = value;
+            if (m_currentHitPoint <= 0.0f)
+            {
+                m_currentHitPoint = 0;
+                StartCoroutine(OnDeath());
+            }
+        }
+    }
+
+    public float HitPoint
+    {
+        get => m_hitPoint;
+    }
 
     // Use this for initialization
     void Start ()
@@ -37,7 +59,7 @@ public class HeroKnight : MonoBehaviour {
         m_wallSensorR2 = transform.Find("WallSensor_R2").GetComponent<Sensor_HeroKnight>();
         m_wallSensorL1 = transform.Find("WallSensor_L1").GetComponent<Sensor_HeroKnight>();
         m_wallSensorL2 = transform.Find("WallSensor_L2").GetComponent<Sensor_HeroKnight>();
-        currentHitPoint = hitPoint;
+        CurrentHitPoint = m_hitPoint;
     }
 
     // Update is called once per frame
@@ -207,12 +229,27 @@ public class HeroKnight : MonoBehaviour {
 
         if (aiController)
         {
-            currentHitPoint -= aiController.damage;
+            CurrentHitPoint -= aiController.damage;
             Vector2 direction = collision.gameObject.transform.position.normalized;
-            direction.y = 0f;
-            m_body2d.velocity = Vector2.zero;
-            m_body2d.AddForce(direction * 150, ForceMode2D.Impulse);
+            m_rolling = true;
+            m_body2d.AddForce(direction * m_hitForce, ForceMode2D.Impulse);
+            StartCoroutine(OnHitWaiting());
         }
     }
 
+    private IEnumerator OnHitWaiting()
+    {
+        yield return m_hitSeconds;
+        m_rolling = false;
+    }
+
+    private IEnumerator OnDeath()
+    {
+        m_animator.SetBool("noBlood", m_noBlood);
+        m_animator.SetTrigger("Death");
+
+        yield return m_deathSeconds;
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
 }
