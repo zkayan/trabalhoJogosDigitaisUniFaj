@@ -8,27 +8,27 @@ public class HeroKnight : MonoBehaviour {
     [SerializeField] float      m_jumpForce = 5.5f;
     [SerializeField] float      m_rollForce = 6.0f;
     [SerializeField] bool       m_noBlood = false;
-    [SerializeField] GameObject m_slideDust;
     [SerializeField] float      m_hitPoint = 100.0f;
     [SerializeField] int        m_hitForce = 5;
     [SerializeField] float      m_currentHitPoint;
+    [SerializeField] Transform  m_attackCheck;
+    [SerializeField] float      m_radiusAttack;
+
 
     private Animator            m_animator;
     private Rigidbody2D         m_body2d;
     private Sensor_HeroKnight   m_groundSensor;
-    private Sensor_HeroKnight   m_wallSensorR1;
-    private Sensor_HeroKnight   m_wallSensorR2;
-    private Sensor_HeroKnight   m_wallSensorL1;
-    private Sensor_HeroKnight   m_wallSensorL2;
     private bool                m_grounded = false;
     private bool                m_extraJump = false;
     private bool                m_rolling = false;
+    private bool                m_dead = false;
     private int                 m_facingDirection = 1;
     private int                 m_currentAttack = 0;
     private float               m_timeSinceAttack = 0.0f;
     private float               m_delayToIdle = 0.0f;
     private WaitForSeconds      m_hitSeconds = new WaitForSeconds(0.3f);
     private WaitForSeconds      m_deathSeconds = new WaitForSeconds(2f);
+    private float               m_timeNextAttack;
 
     public float CurrentHitPoint
     {
@@ -39,6 +39,7 @@ public class HeroKnight : MonoBehaviour {
             if (m_currentHitPoint <= 0.0f)
             {
                 m_currentHitPoint = 0;
+                m_dead = true;
                 StartCoroutine(OnDeath());
             }
         }
@@ -50,20 +51,16 @@ public class HeroKnight : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         m_animator = GetComponent<Animator>();
         m_body2d = GetComponent<Rigidbody2D>();
         m_groundSensor = transform.Find("GroundSensor").GetComponent<Sensor_HeroKnight>();
-        m_wallSensorR1 = transform.Find("WallSensor_R1").GetComponent<Sensor_HeroKnight>();
-        m_wallSensorR2 = transform.Find("WallSensor_R2").GetComponent<Sensor_HeroKnight>();
-        m_wallSensorL1 = transform.Find("WallSensor_L1").GetComponent<Sensor_HeroKnight>();
-        m_wallSensorL2 = transform.Find("WallSensor_L2").GetComponent<Sensor_HeroKnight>();
         CurrentHitPoint = m_hitPoint;
     }
 
     // Update is called once per frame
-    void Update ()
+    void Update()
     {
         // Increase timer that controls attack combo
         m_timeSinceAttack += Time.deltaTime;
@@ -86,42 +83,31 @@ public class HeroKnight : MonoBehaviour {
         float inputX = Input.GetAxis("Horizontal");
 
         // Swap direction of sprite depending on walk direction
-        if (inputX > 0)
+        if (inputX > 0 && !m_dead)
         {
             GetComponent<SpriteRenderer>().flipX = false;
             m_facingDirection = 1;
+            m_attackCheck.localPosition = new Vector2(m_attackCheck.localPosition.x > 0 ? m_attackCheck.localPosition.x : -m_attackCheck.localPosition.x, m_attackCheck.localPosition.y);
         }
-            
-        else if (inputX < 0)
+
+        else if (inputX < 0 && !m_dead)
         {
             GetComponent<SpriteRenderer>().flipX = true;
             m_facingDirection = -1;
+            m_attackCheck.localPosition = new Vector2(m_attackCheck.localPosition.x < 0 ? m_attackCheck.localPosition.x : -m_attackCheck.localPosition.x, m_attackCheck.localPosition.y);
         }
 
         // Move
-        if (!m_rolling)
+        if (!m_rolling && !m_dead)
             m_body2d.velocity = new Vector2(inputX * m_speed, m_body2d.velocity.y);
 
         //Set AirSpeed in animator
         m_animator.SetFloat("AirSpeedY", m_body2d.velocity.y);
 
         // -- Handle Animations --
-        //Wall Slide
-        m_animator.SetBool("WallSlide", (m_wallSensorR1.State() && m_wallSensorR2.State()) || (m_wallSensorL1.State() && m_wallSensorL2.State()));
-
-        //Death
-        if (Input.GetKeyDown("e") && !m_rolling)
-        {
-            m_animator.SetBool("noBlood", m_noBlood);
-            m_animator.SetTrigger("Death");
-        }
-            
-        //Hurt
-        else if (Input.GetKeyDown("q") && !m_rolling)
-            m_animator.SetTrigger("Hurt");
 
         //Attack
-        else if((Input.GetMouseButtonDown(0) || Input.GetKeyDown("j")) && m_timeSinceAttack > 0.25f && !m_rolling)
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown("j")) && m_timeSinceAttack > 0.25f && !m_rolling && !m_dead)
         {
             m_currentAttack++;
 
@@ -141,26 +127,26 @@ public class HeroKnight : MonoBehaviour {
         }
 
         // Block
-        else if ((Input.GetMouseButtonDown(1) || Input.GetKeyDown("k")) && !m_rolling)
+        else if ((Input.GetMouseButtonDown(1) || Input.GetKeyDown("k")) && !m_rolling && !m_dead)
         {
             m_animator.SetTrigger("Block");
             m_animator.SetBool("IdleBlock", true);
         }
 
-        else if (Input.GetMouseButtonUp(1) || Input.GetKeyUp("k"))
+        else if (Input.GetMouseButtonUp(1) || Input.GetKeyUp("k") && !m_dead)
             m_animator.SetBool("IdleBlock", false);
 
         // Roll
-        else if (Input.GetKeyDown("left shift") && !m_rolling)
+        else if (Input.GetKeyDown("left shift") && !m_rolling && !m_dead)
         {
             m_rolling = true;
             m_animator.SetTrigger("Roll");
             m_body2d.velocity = new Vector2(m_facingDirection * m_rollForce, m_body2d.velocity.y);
         }
-            
+
 
         //Jump
-        else if (Input.GetKeyDown("space") && m_grounded && !m_rolling)
+        else if (Input.GetKeyDown("space") && m_grounded && !m_rolling && !m_dead)
         {
             m_animator.SetTrigger("Jump");
             m_grounded = false;
@@ -169,7 +155,7 @@ public class HeroKnight : MonoBehaviour {
             m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
             m_groundSensor.Disable(0.2f);
         }
-        else if (Input.GetKeyDown("space") && m_extraJump && !m_rolling)
+        else if (Input.GetKeyDown("space") && m_extraJump && !m_rolling && !m_dead)
         {
             m_animator.SetTrigger("Jump");
             m_grounded = false;
@@ -180,7 +166,7 @@ public class HeroKnight : MonoBehaviour {
         }
 
         //Run
-        else if (Mathf.Abs(inputX) > Mathf.Epsilon)
+        else if (Mathf.Abs(inputX) > Mathf.Epsilon && !m_dead)
         {
             // Reset timer
             m_delayToIdle = 0.05f;
@@ -192,8 +178,8 @@ public class HeroKnight : MonoBehaviour {
         {
             // Prevents flickering transitions to idle
             m_delayToIdle -= Time.deltaTime;
-                if(m_delayToIdle < 0)
-                    m_animator.SetInteger("AnimState", 0);
+            if (m_delayToIdle < 0)
+                m_animator.SetInteger("AnimState", 0);
         }
     }
 
@@ -204,31 +190,13 @@ public class HeroKnight : MonoBehaviour {
         m_rolling = false;
     }
 
-    // Called in slide animation.
-    void AE_SlideDust()
-    {
-        Vector3 spawnPosition;
-
-        if (m_facingDirection == 1)
-            spawnPosition = m_wallSensorR2.transform.position;
-        else
-            spawnPosition = m_wallSensorL2.transform.position;
-
-        if (m_slideDust != null)
-        {
-            // Set correct arrow spawn position
-            GameObject dust = Instantiate(m_slideDust, spawnPosition, gameObject.transform.localRotation) as GameObject;
-            // Turn arrow in correct direction
-            dust.transform.localScale = new Vector3(m_facingDirection, 1, 1);
-        }
-    }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         AiController aiController = collision.gameObject.GetComponent<AiController>();
 
         if (aiController)
         {
+            m_animator.SetTrigger("Hurt");
             CurrentHitPoint -= aiController.damage;
             Vector2 direction = collision.gameObject.transform.position.normalized;
             m_rolling = true;
@@ -249,7 +217,14 @@ public class HeroKnight : MonoBehaviour {
         m_animator.SetTrigger("Death");
 
         yield return m_deathSeconds;
+        m_dead = false;
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(m_attackCheck.position, m_radiusAttack);
     }
 }
