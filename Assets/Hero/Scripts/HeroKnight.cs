@@ -13,6 +13,7 @@ public class HeroKnight : MonoBehaviour {
     [SerializeField] float      m_currentHitPoint;
     [SerializeField] Transform  m_attackCheck;
     [SerializeField] float      m_radiusAttack;
+    [SerializeField] LayerMask  m_enemyLayer;
 
 
     private Animator            m_animator;
@@ -220,6 +221,16 @@ public class HeroKnight : MonoBehaviour {
         m_dead = false;
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void PlayerAttack()
+    {
+        Collider2D[] enemiesAttack = Physics2D.OverlapCircleAll(m_attackCheck.position, m_radiusAttack, m_enemyLayer);
+        for(int i = 0; i < enemiesAttack.Length; i++)
+        {
+            enemiesAttack[i].SendMessage("EnemyHit");
+            Debug.Log(enemiesAttack[i].name);
+        }
     }
 
     private void OnDrawGizmosSelected()
