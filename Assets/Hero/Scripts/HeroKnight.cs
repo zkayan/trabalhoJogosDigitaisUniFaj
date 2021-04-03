@@ -9,11 +9,12 @@ public class HeroKnight : MonoBehaviour {
     [SerializeField] float      m_rollForce = 6.0f;
     [SerializeField] bool       m_noBlood = false;
     [SerializeField] float      m_hitPoint = 100.0f;
-    [SerializeField] int        m_hitForce = 5;
     [SerializeField] float      m_currentHitPoint;
+    [SerializeField] int        m_hitForce = 5;
     [SerializeField] Transform  m_attackCheck;
     [SerializeField] float      m_radiusAttack;
     [SerializeField] LayerMask  m_enemyLayer;
+    [SerializeField] float      m_attackForce = 10.0f;
 
 
     private Animator            m_animator;
@@ -228,7 +229,8 @@ public class HeroKnight : MonoBehaviour {
         Collider2D[] enemiesAttack = Physics2D.OverlapCircleAll(m_attackCheck.position, m_radiusAttack, m_enemyLayer);
         for(int i = 0; i < enemiesAttack.Length; i++)
         {
-            enemiesAttack[i].SendMessage("EnemyHit");
+            AiController enemy = enemiesAttack[i].GetComponent<AiController>();
+            enemy.TakeDamage(m_attackForce);
             Debug.Log(enemiesAttack[i].name);
         }
     }
