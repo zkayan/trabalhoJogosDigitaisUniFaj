@@ -198,13 +198,18 @@ public class HeroKnight : MonoBehaviour {
 
         if (aiController)
         {
-            m_animator.SetTrigger("Hurt");
-            CurrentHitPoint -= aiController.damage;
             Vector2 direction = collision.gameObject.transform.position.normalized;
-            m_rolling = true;
-            m_body2d.AddForce(direction * m_hitForce, ForceMode2D.Impulse);
-            StartCoroutine(OnHitWaiting());
+            TakeDamage(direction, aiController);
         }
+    }
+
+    public void TakeDamage(Vector2 direction, AiController aiController)
+    {
+        m_animator.SetTrigger("Hurt");
+        CurrentHitPoint -= aiController.damage;
+        m_rolling = true;
+        m_body2d.AddForce(direction * m_hitForce, ForceMode2D.Impulse);
+        StartCoroutine(OnHitWaiting());
     }
 
     private IEnumerator OnHitWaiting()
@@ -226,12 +231,11 @@ public class HeroKnight : MonoBehaviour {
 
     private void PlayerAttack()
     {
-        Collider2D[] enemiesAttack = Physics2D.OverlapCircleAll(m_attackCheck.position, m_radiusAttack, m_enemyLayer);
-        for(int i = 0; i < enemiesAttack.Length; i++)
+        Collider2D[] enemiesAttacked = Physics2D.OverlapCircleAll(m_attackCheck.position, m_radiusAttack, m_enemyLayer);
+        for(int i = 0; i < enemiesAttacked.Length; i++)
         {
-            AiController enemy = enemiesAttack[i].GetComponent<AiController>();
+            AiController enemy = enemiesAttacked[i].GetComponent<AiController>();
             enemy.TakeDamage(m_attackForce);
-            Debug.Log(enemiesAttack[i].name);
         }
     }
 
