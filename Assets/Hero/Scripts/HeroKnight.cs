@@ -198,7 +198,7 @@ public class HeroKnight : MonoBehaviour {
 
         if (aiController)
         {
-            Vector2 direction = collision.gameObject.transform.position.normalized;
+            Vector2 direction = collision.gameObject.GetComponent<Rigidbody2D>().velocity.normalized;
             TakeDamage(direction, aiController);
         }
     }

@@ -112,7 +112,7 @@ public class AiController : MonoBehaviour
         {
             HeroKnight player = playerAttacked.GetComponent<HeroKnight>();
 
-            Vector2 direction = this.gameObject.transform.position.normalized;
+            Vector2 direction = new Vector2(m_facingRight ? 1 : -1, 0);
 
             player.TakeDamage(direction, this);
         }
