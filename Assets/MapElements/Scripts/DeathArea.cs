@@ -11,7 +11,11 @@ public class DeathArea : MonoBehaviour
         {
             HeroKnight hero = collision.gameObject.GetComponent<HeroKnight>();
 
-            hero.CurrentHitPoint -= hero.HitPoint;
+            if (!hero.Dead)
+            {
+                hero.CurrentHitPoint -= hero.HitPoint;
+            }
+
         }
     }
 

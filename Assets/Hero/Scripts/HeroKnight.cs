@@ -32,6 +32,7 @@ public class HeroKnight : MonoBehaviour {
     private WaitForSeconds      m_hitSeconds = new WaitForSeconds(0.3f);
     private WaitForSeconds      m_deathSeconds = new WaitForSeconds(2f);
     private float               m_timeNextAttack;
+    private bool                m_isBlocking = false;
 
     public float CurrentHitPoint
     {
@@ -51,6 +52,10 @@ public class HeroKnight : MonoBehaviour {
     public float HitPoint
     {
         get => m_hitPoint;
+    }
+
+    public bool Dead {
+        get => m_dead;
     }
 
     // Use this for initialization
@@ -90,8 +95,10 @@ public class HeroKnight : MonoBehaviour {
         }
 
         // Move
-        if (!m_rolling && !m_dead)
+        if (!m_rolling && !m_dead && !m_isBlocking)
+        {
             m_body2d.velocity = new Vector2(inputX * m_speed, m_body2d.velocity.y);
+        }
 
         //Set AirSpeed in animator
         m_animator.SetFloat("AirSpeedY", m_body2d.velocity.y);
@@ -123,10 +130,14 @@ public class HeroKnight : MonoBehaviour {
         {
             m_animator.SetTrigger("Block");
             m_animator.SetBool("IdleBlock", true);
+            m_isBlocking = true;
         }
 
         else if (Input.GetMouseButtonUp(1) || Input.GetKeyUp("k") && !m_dead)
+        {
             m_animator.SetBool("IdleBlock", false);
+            m_isBlocking = false;
+        }
 
         // Roll
         else if (Input.GetKeyDown("left shift") && !m_rolling && !m_dead)
@@ -193,11 +204,14 @@ public class HeroKnight : MonoBehaviour {
 
     public void TakeDamage(Vector2 direction, AiController aiController)
     {
-        m_animator.SetTrigger("Hurt");
-        CurrentHitPoint -= aiController.damage;
-        m_rolling = true;
-        m_body2d.AddForce(direction * m_hitForce, ForceMode2D.Impulse);
-        StartCoroutine(OnHitWaiting());
+        if (!m_isBlocking)
+        {
+            m_animator.SetTrigger("Hurt");
+            CurrentHitPoint -= aiController.damage;
+            m_rolling = true;
+            m_body2d.AddForce(direction * m_hitForce, ForceMode2D.Impulse);
+            StartCoroutine(OnHitWaiting());
+        }
     }
 
     private IEnumerator OnHitWaiting()

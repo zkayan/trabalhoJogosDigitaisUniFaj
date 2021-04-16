@@ -15,7 +15,7 @@ public class AiController : MonoBehaviour
     [SerializeField] LayerMask  m_playerLayer;
     public float                damage = 2.0f;
 
-    private Transform           m_player;
+    private HeroKnight          m_player;
     private Rigidbody2D         m_body2d;
     private Animator            m_animator;
     private Vector3             m_playerDistance;
@@ -44,7 +44,7 @@ public class AiController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        m_player = GameObject.FindGameObjectWithTag("Player").transform;
+        m_player = GameObject.FindGameObjectWithTag("Player").GetComponent<HeroKnight>();
         m_body2d = GetComponent<Rigidbody2D>();
         m_animator = GetComponent<Animator>();
         CurrentHitPoint = m_hitPoint;
@@ -53,7 +53,7 @@ public class AiController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (!m_hited && !m_dead && !m_attacking)
+        if (!m_hited && !m_dead && !m_attacking && !m_player.Dead)
         {
             m_playerDistance = m_player.transform.position - transform.position;
             if(Mathf.Abs(m_playerDistance.x) < m_minDistanceX && Mathf.Abs(m_playerDistance.y) < m_minDistanceY)
@@ -122,7 +122,7 @@ public class AiController : MonoBehaviour
     {
         Collider2D playerInRange = Physics2D.OverlapCircle(m_attackCheck.position, m_radiusAttack, m_playerLayer);
 
-        if (playerInRange == null || m_dead)
+        if (playerInRange == null || m_dead || m_player.Dead)
         {
             m_attacking = false;
         }
@@ -134,7 +134,7 @@ public class AiController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.tag == "Player")
+        if(collision.gameObject.tag == "Player" && !m_player.Dead)
         {
             m_animator.SetTrigger("Attack");
             m_attacking = true;

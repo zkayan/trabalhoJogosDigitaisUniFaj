@@ -206,6 +206,7 @@ MonoBehaviour:
   m_playerLayer:
     serializedVersion: 2
     m_Bits: 128
+  m_playerH: {fileID: 0}
   damage: 20
 --- !u!70 &61955846050303475
 CapsuleCollider2D:
