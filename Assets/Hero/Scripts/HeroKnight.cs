@@ -15,11 +15,12 @@ public class HeroKnight : MonoBehaviour {
     [SerializeField] float      m_radiusAttack;
     [SerializeField] LayerMask  m_enemyLayer;
     [SerializeField] float      m_attackForce = 10.0f;
-
+    [SerializeField] Vector3    m_offset = Vector2.zero;
+    [SerializeField] float      m_radius = 10.0f;
+    [SerializeField] LayerMask  m_groundLayer;
 
     private Animator            m_animator;
     private Rigidbody2D         m_body2d;
-    private Sensor_HeroKnight   m_groundSensor;
     private bool                m_grounded = false;
     private bool                m_extraJump = false;
     private bool                m_rolling = false;
@@ -57,7 +58,6 @@ public class HeroKnight : MonoBehaviour {
     {
         m_animator = GetComponent<Animator>();
         m_body2d = GetComponent<Rigidbody2D>();
-        m_groundSensor = transform.Find("GroundSensor").GetComponent<Sensor_HeroKnight>();
         CurrentHitPoint = m_hitPoint;
     }
 
@@ -68,18 +68,8 @@ public class HeroKnight : MonoBehaviour {
         m_timeSinceAttack += Time.deltaTime;
 
         //Check if character just landed on the ground
-        if (!m_grounded && m_groundSensor.State())
-        {
-            m_grounded = true;
-            m_animator.SetBool("Grounded", m_grounded);
-        }
-
-        //Check if character just started falling
-        if (m_grounded && !m_groundSensor.State())
-        {
-            m_grounded = false;
-            m_animator.SetBool("Grounded", m_grounded);
-        }
+        m_grounded = Physics2D.OverlapCircle(this.transform.position + m_offset, m_radius, m_groundLayer);
+        m_animator.SetBool("Grounded", m_grounded);
 
         // -- Handle input and movement --
         float inputX = Input.GetAxis("Horizontal");
@@ -155,7 +145,6 @@ public class HeroKnight : MonoBehaviour {
             m_extraJump = true;
             m_animator.SetBool("Grounded", m_grounded);
             m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
-            m_groundSensor.Disable(0.2f);
         }
         else if (Input.GetKeyDown("space") && m_extraJump && !m_rolling && !m_dead)
         {
@@ -164,7 +153,6 @@ public class HeroKnight : MonoBehaviour {
             m_extraJump = false;
             m_animator.SetBool("Grounded", m_grounded);
             m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
-            m_groundSensor.Disable(0.2f);
         }
 
         //Run
@@ -243,5 +231,6 @@ public class HeroKnight : MonoBehaviour {
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(m_attackCheck.position, m_radiusAttack);
+        Gizmos.DrawWireSphere((this.transform.position + m_offset), m_radius);
     }
 }
