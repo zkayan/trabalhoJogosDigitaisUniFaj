@@ -36,6 +36,7 @@ public class AiController : MonoBehaviour
                 m_currentHitPoint = 0;
                 m_dead = true;
                 m_animator.SetTrigger("Death");
+                m_animator.SetBool("isDead", true);
             }
         }
     }

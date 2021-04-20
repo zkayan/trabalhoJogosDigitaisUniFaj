@@ -175,8 +175,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   m_attackForce: 10
-  m_offset: {x: 0, y: 0.28, z: 0}
-  m_radius: 0.23
+  m_offset: {x: 0, y: 0.25, z: 0}
+  m_radius: 0.2
   m_groundLayer:
     serializedVersion: 2
     m_Bits: 256
