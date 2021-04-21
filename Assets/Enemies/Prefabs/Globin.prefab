@@ -198,7 +198,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_minDistanceX: 4
   m_minDistanceY: 4
-  m_speed: 0
+  m_speed: 2
   m_hitPoint: 40
   m_currentHitPoint: 0
   m_attackCheck: {fileID: 3638325399762645629}

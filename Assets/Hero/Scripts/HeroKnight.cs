@@ -1,4 +1,12 @@
-﻿using UnityEngine;
+﻿/*
+* Links utilizados como apoio:
+* https://assetstore.unity.com/packages/2d/characters/hero-knight-pixel-art-165188 - código demo do asset utilizado como base
+* https://docs.unity3d.com/Manual/index.html
+* https://www.youtube.com/watch?v=zdoIsdXNHKc
+* https://www.youtube.com/watch?v=NqPYWkmm09E&list=PLgTmU6kuSLtzI4b28f-y4XUV52j7EFx0w
+* https://www.youtube.com/watch?v=uxsajSuJP0w&list=PLgTmU6kuSLtzI4b28f-y4XUV52j7EFx0w
+*/
+using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
