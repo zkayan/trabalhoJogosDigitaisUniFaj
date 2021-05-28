@@ -9,6 +9,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class HeroKnight : MonoBehaviour {
 
@@ -16,8 +17,10 @@ public class HeroKnight : MonoBehaviour {
     [SerializeField] float      m_jumpForce = 5.5f;
     [SerializeField] float      m_rollForce = 6.0f;
     [SerializeField] bool       m_noBlood = false;
-    [SerializeField] float      m_hitPoint = 100.0f;
+
+    [SerializeField] float      m_maxHitPoint = 100.0f;
     [SerializeField] float      m_currentHitPoint;
+
     [SerializeField] int        m_hitForce = 5;
     [SerializeField] Transform  m_attackCheck;
     [SerializeField] float      m_radiusAttack;
@@ -42,6 +45,9 @@ public class HeroKnight : MonoBehaviour {
     private float               m_timeNextAttack;
     private bool                m_isBlocking = false;
 
+    private Slider hitBar = null;
+
+
     public float CurrentHitPoint
     {
         get => m_currentHitPoint;
@@ -59,7 +65,7 @@ public class HeroKnight : MonoBehaviour {
 
     public float HitPoint
     {
-        get => m_hitPoint;
+        get => m_maxHitPoint;
     }
 
     public bool Dead {
@@ -71,7 +77,11 @@ public class HeroKnight : MonoBehaviour {
     {
         m_animator = GetComponent<Animator>();
         m_body2d = GetComponent<Rigidbody2D>();
-        CurrentHitPoint = m_hitPoint;
+        CurrentHitPoint = m_maxHitPoint;
+
+        hitBar = GameObject.Find("LifeBar").GetComponent<Slider>();
+        if (hitBar != null)
+            hitBar.value = m_currentHitPoint / m_maxHitPoint;
     }
 
     // Update is called once per frame
@@ -207,15 +217,33 @@ public class HeroKnight : MonoBehaviour {
         {
             Vector2 direction = collision.gameObject.GetComponent<Rigidbody2D>().velocity.normalized;
             TakeDamage(direction, aiController);
+        }        
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.CompareTag("Pikup"))
+        {
+            CurrentHitPoint += 25;
+            if (m_currentHitPoint > m_maxHitPoint)
+                m_currentHitPoint = m_maxHitPoint;
+            if (hitBar != null)
+                hitBar.value = m_currentHitPoint / m_maxHitPoint;
+
+            Destroy(collision.gameObject);
         }
     }
+
+
 
     public void TakeDamage(Vector2 direction, AiController aiController)
     {
         if (!m_isBlocking)
         {
-            m_animator.SetTrigger("Hurt");
+            m_animator.SetTrigger("Hurt");           
             CurrentHitPoint -= aiController.damage;
+            if (hitBar != null)
+                hitBar.value = m_currentHitPoint / m_maxHitPoint;
             m_rolling = true;
             m_body2d.AddForce(direction * m_hitForce, ForceMode2D.Impulse);
             StartCoroutine(OnHitWaiting());
@@ -230,6 +258,8 @@ public class HeroKnight : MonoBehaviour {
 
     private IEnumerator OnDeath()
     {
+        if (hitBar != null)
+            hitBar.value = 0.0f;
         m_animator.SetBool("noBlood", m_noBlood);
         m_animator.SetTrigger("Death");
 
