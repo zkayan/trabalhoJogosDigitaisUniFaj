@@ -135,7 +135,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -155,7 +155,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: ae44d6ca9dc728943a492226b377d3f4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -209,7 +209,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   damage: 20
-  m_deathEffectPrefab: {fileID: 8803412129036056928, guid: 9d7d1828d9a202b46874a56d8e6f74e7, type: 3}
+  m_deathEffectPrefab: {fileID: 1248695710082450584, guid: 1208925a1e693224c9ac88e73fd040b1, type: 3}
 --- !u!70 &61955846050303475
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

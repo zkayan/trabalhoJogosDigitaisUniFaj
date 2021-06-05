@@ -41,6 +41,11 @@ public class AiController : MonoBehaviour
             {
                 m_currentHitPoint = 0;
                 m_dead = true;
+                if (m_deathEffectPrefab)
+                {
+                    GameObject temp = Instantiate<GameObject>(m_deathEffectPrefab, this.transform.position, this.transform.rotation);
+                    Destroy(temp, 2.0f);
+                }
                 m_animator.SetTrigger("Death");
                 m_animator.SetBool("isDead", true);
             }
@@ -113,12 +118,6 @@ public class AiController : MonoBehaviour
 
     private void DestroyEnemy()
     {
-        if (m_deathEffectPrefab)
-        {
-            GameObject temp = Instantiate<GameObject>(m_deathEffectPrefab, this.transform.position, this.transform.rotation);
-            Destroy(temp, 2.0f);
-        }
-
         Destroy(gameObject);
     }
 
