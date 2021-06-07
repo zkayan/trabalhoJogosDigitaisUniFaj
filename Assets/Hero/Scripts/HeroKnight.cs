@@ -30,6 +30,8 @@ public class HeroKnight : MonoBehaviour {
     [SerializeField] float      m_radius = 10.0f;
     [SerializeField] LayerMask  m_groundLayer;
 
+    [SerializeField] GameObject m_winCanvas;
+
     private Animator            m_animator;
     private Rigidbody2D         m_body2d;
     private bool                m_grounded = false;
@@ -232,9 +234,18 @@ public class HeroKnight : MonoBehaviour {
 
             Destroy(collision.gameObject);
         }
+        if (collision.gameObject.CompareTag("Chest"))
+        {
+            m_winCanvas.SetActive(true);
+            StartCoroutine(OnWin());
+        }
     }
 
-
+    private IEnumerator OnWin()
+    {
+        yield return new WaitForSeconds(2);
+        SceneManager.LoadScene("Menu");
+    }
 
     public void TakeDamage(Vector2 direction, AiController aiController)
     {

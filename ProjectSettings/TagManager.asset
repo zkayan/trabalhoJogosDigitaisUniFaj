@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Pikup
+  - Chest
   layers:
   - Default
   - TransparentFX
